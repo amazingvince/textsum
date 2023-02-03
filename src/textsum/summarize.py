@@ -321,8 +321,9 @@ class Summarizer:
             ]
         else:
             sum_text = [s["summary"][0] for s in summary_data]
-
-        sum_scores = [f"\n - {round(s['summary_score'],4)}" for s in summary_data]
+            
+        if 'summary_score' in summary_data[0]:
+            sum_scores = [f"\n - {round(s['summary_score'],4)}" for s in summary_data]
         scores_text = "\n".join(sum_scores)
         full_summary = "\n\t".join(sum_text)
 
