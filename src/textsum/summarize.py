@@ -32,7 +32,7 @@ class Summarizer:
         batch_stride: int = 16,
         max_length_ratio: float = 0.25,
         load_in_8bit=False,
-        cache_dir=None
+        cache_dir=None,
         
         **kwargs,
     ):
@@ -70,7 +70,7 @@ class Summarizer:
         else:
             self.model = AutoModelForSeq2SeqLM.from_pretrained(
                 self.model_name_or_path,
-                cache_dir=cache_dir
+                cache_dir=cache_dir,
             ).to(self.device)
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name_or_path, cache_dir=cache_dir)
