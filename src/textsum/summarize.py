@@ -476,3 +476,86 @@ class Summarizer:
         if verbose:
             self.logger.info(f"parameters: {exported_params}")
             print(f"saved parameters to {metadata_path}")
+    
+    
+    def summarize_string_no_pad(
+        self,
+        input_text: str,
+        **kwargs,
+    ) -> str:
+        """
+        summarize_string - generate a summary for a string of text
+        :param str input_text: the text to summarize
+        :param int batch_length: number of tokens to use in each batch, defaults to None (self.token_batch_length)
+        :param int batch_stride: number of tokens to stride between batches, defaults to None (self.batch_stride)
+        :return str: the summary
+        """
+
+        logger = logging.getLogger(__name__)
+
+
+        logger.debug(
+            f"batch_length: {batch_length} batch_stride: {batch_stride}, kwargs: {kwargs}"
+        )
+
+        gen_summaries = self.summarize_via_tokenbatches_no_pad(
+            input_text,
+            **kwargs,
+        )
+
+        return self.save_summary(summary_data=gen_summaries, return_string=True)
+    
+    def summarize_via_tokenbatches_no_pad(
+        self,
+        input_text: str,
+        **kwargs,
+    ):
+        """
+        summarize_via_tokenbatches - given a string of text, split it into batches of tokens and summarize each batch
+
+        :param str input_text: the text to summarize
+        :param int batch_length: number of tokens to include in each input batch, default None (self.token_batch_length)
+        :param int batch_stride: number of tokens to stride between batches, default None (self.token_batch_stride)
+        :return: a list of summaries, a list of scores, and a list of the input text for each batch
+        """
+
+
+        self.logger.debug(
+            f"batch_length: {batch_length} batch_stride: {batch_stride}, kwargs: {kwargs}"
+        )
+        if kwargs:
+            # if received kwargs, update inference params
+            self.set_inference_params(**kwargs)
+
+        params = self.get_inference_params()
+
+        encoded_input = self.tokenizer(
+            input_text,
+            add_special_tokens=False,
+            return_tensors="pt",
+        )
+        in_id_arr, att_arr = encoded_input.input_ids, encoded_input.attention_mask
+
+        gen_summaries = []
+        pbar = tqdm(total=len(in_id_arr), desc="Generating Summaries")
+
+        for _id, _mask in zip(in_id_arr, att_arr):
+
+            result, score = self.summarize_and_score(
+                ids=_id,
+                mask=_mask,
+                **params,
+            )
+            score = round(float(score), 4)
+            _sum = {
+                "input_tokens": _id,
+                "summary": result,
+                "summary_score": score,
+            }
+            gen_summaries.append(_sum)
+            self.logger.debug(f"\n\t{result[0]}\nScore:\t{score}")
+            pbar.update()
+
+        pbar.close()
+
+        return gen_summaries
