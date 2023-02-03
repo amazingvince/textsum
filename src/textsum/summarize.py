@@ -214,7 +214,10 @@ class Summarizer:
             remove_invalid_values=True,
         )
         self.logger.debug(f"summary: {summary}")
-        score = round(summary_pred_ids.sequences_scores.cpu().numpy()[0], 4)
+        try:
+            score = round(summary_pred_ids.sequences_scores.cpu().numpy()[0], 4)
+        except:
+            score = 0
 
         return summary, score
 
