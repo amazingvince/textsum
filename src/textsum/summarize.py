@@ -495,7 +495,7 @@ class Summarizer:
 
 
         logger.debug(
-            f"batch_length: {batch_length} batch_stride: {batch_stride}, kwargs: {kwargs}"
+            f"kwargs: {kwargs}"
         )
 
         gen_summaries = self.summarize_via_tokenbatches_no_pad(
@@ -521,7 +521,7 @@ class Summarizer:
 
 
         self.logger.debug(
-            f"batch_length: {batch_length} batch_stride: {batch_stride}, kwargs: {kwargs}"
+            f"kwargs: {kwargs}"
         )
         if kwargs:
             # if received kwargs, update inference params
