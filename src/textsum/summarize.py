@@ -32,6 +32,8 @@ class Summarizer:
         batch_stride: int = 16,
         max_length_ratio: float = 0.25,
         load_in_8bit=False,
+        cache_dir=None
+        
         **kwargs,
     ):
         """
@@ -63,13 +65,15 @@ class Summarizer:
                 model_name_or_path,
                 load_in_8bit=load_in_8bit,
                 device_map="auto",
+                cache_dir=cache_dir,
             )
         else:
             self.model = AutoModelForSeq2SeqLM.from_pretrained(
                 self.model_name_or_path,
+                cache_dir=cache_dir
             ).to(self.device)
 
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name_or_path)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name_or_path, cache_dir=cache_dir)
         self.is_general_attention_model = (
             is_general_attention_model  # TODO: add a check later
         )
