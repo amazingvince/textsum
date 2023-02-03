@@ -32,7 +32,8 @@ class Summarizer:
         batch_stride: int = 16,
         max_length_ratio: float = 0.25,
         load_in_8bit=False,
-        cache_dir=None,
+        model_options={},
+        tokenizer_options={},
         
         **kwargs,
     ):
@@ -65,15 +66,15 @@ class Summarizer:
                 model_name_or_path,
                 load_in_8bit=load_in_8bit,
                 device_map="auto",
-                cache_dir=cache_dir,
+                **model_options
             )
         else:
             self.model = AutoModelForSeq2SeqLM.from_pretrained(
                 self.model_name_or_path,
-                cache_dir=cache_dir,
+                **model_options
             ).to(self.device)
 
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name_or_path, cache_dir=cache_dir)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name_or_path, **tokenizer_options)
         self.is_general_attention_model = (
             is_general_attention_model  # TODO: add a check later
         )
@@ -234,11 +235,11 @@ class Summarizer:
         """
 
         # log all input parameters
-        if batch_length and batch_length < 512:
-            self.logger.warning(
-                "WARNING: entered batch_length was too low at {batch_length}, resetting to 512"
-            )
-            batch_length = 512
+#         if batch_length and batch_length < 512:
+#             self.logger.warning(
+#                 "WARNING: entered batch_length was too low at {batch_length}, resetting to 512"
+#             )
+#             batch_length = 512
 
         self.logger.debug(
             f"batch_length: {batch_length} batch_stride: {batch_stride}, kwargs: {kwargs}"
@@ -377,11 +378,11 @@ class Summarizer:
 
         logger = logging.getLogger(__name__)
         # log all input parameters
-        if batch_length and batch_length < 512:
-            logger.warning(
-                "WARNING: entered batch_length was too low at {batch_length}, resetting to 512"
-            )
-            batch_length = 512
+#         if batch_length and batch_length < 512:
+#             logger.warning(
+#                 "WARNING: entered batch_length was too low at {batch_length}, resetting to 512"
+#             )
+#             batch_length = 512
 
         logger.debug(
             f"batch_length: {batch_length} batch_stride: {batch_stride}, kwargs: {kwargs}"
